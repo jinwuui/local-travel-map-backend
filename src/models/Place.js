@@ -3,7 +3,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
 const Place = sequelize.define("Place", {
-  id: {
+  placeId: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
@@ -22,7 +22,7 @@ const Place = sequelize.define("Place", {
   },
   description: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   rating: {
     type: DataTypes.INTEGER,

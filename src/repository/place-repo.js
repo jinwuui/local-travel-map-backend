@@ -1,9 +1,9 @@
 const Place = require("../models/Place");
 
 module.exports = {
-  async readPlaces() {
+  async readPlaces(category) {
     return await Place.findAll({
-      attributes: ["id", "lat", "lng", "name", "category"],
+      attributes: ["placeId", "lat", "lng", "name", "category"],
     });
   },
 
@@ -13,13 +13,13 @@ module.exports = {
     });
   },
 
-  async createPlace(place) {
-    return await Place.create(place);
+  async createPlace(place, t) {
+    return await Place.create(place, { transaction: t });
   },
 
   async updatePlace(placeId, password, changes) {
     const [updated] = await Place.update(changes, {
-      where: { id: placeId },
+      where: { placeId: placeId },
     });
 
     return updated ? true : false;
@@ -28,7 +28,7 @@ module.exports = {
   async deletePlace(placeId, password) {
     const deleted = await User.destroy({
       where: {
-        id: placeId,
+        placeId: placeId,
       },
     });
 

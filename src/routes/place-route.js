@@ -1,13 +1,17 @@
 const { Router } = require("express");
+const sequelize = require("../config/database");
+const upload = require("../config/upload");
 const placeRepo = require("../repository/place-repo");
-const { HostNotFoundError } = require("sequelize");
+const photoRepo = require("../repository/photo-repo");
 
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const places = await placeRepo.readPlaces();
-    res.status(200).json({ places: places });
+    const places = await placeRepo.readPlaces(req.query.category);
+
+    if (places) res.status(200).json({ places: places });
+    else res.status(204).json({ places: [] });
   } catch (error) {
     console.log("-- error", error);
     res.status(400).json({ message: error.message });
@@ -24,11 +28,18 @@ router.get("/:placeId", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", upload.array("photos", 5), async (req, res) => {
+  const t = await sequelize.transaction();
+
   try {
-    const place = await placeRepo.createPlace(req.body);
-    res.status(201).json({ placeId: place.id });
+    const place = await placeRepo.createPlace(req.body, t);
+    const photos = await photoRepo.createPhotos(req.files, place.placeId, t);
+
+    await t.commit();
+
+    res.status(201).json({ placeId: place.placeId });
   } catch (error) {
+    await t.rollback();
     console.log("-- error", error);
     res.status(400).json({ message: error.message });
   }

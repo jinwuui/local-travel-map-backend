@@ -2,7 +2,7 @@ const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize({
   dialect: "sqlite",
-  storage: ":memory:",
+  storage: "/Users/jinwoo/localtravel.db",
   logging: console.log,
 });
 

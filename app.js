@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
-const { Place, Photo } = require("./src/models");
 
 const app = express();
 

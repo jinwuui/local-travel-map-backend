@@ -9,7 +9,7 @@ module.exports = {
 
   async readPlaceDetails(placeId) {
     return await Place.findByPk(placeId, {
-      attributes: ["description", "category"],
+      attributes: ["description", "rating"],
     });
   },
 

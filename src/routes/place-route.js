@@ -3,9 +3,11 @@ const sequelize = require("../config/database");
 const upload = require("../config/upload");
 const placeRepo = require("../repository/place-repo");
 const photoRepo = require("../repository/photo-repo");
+const categoryRepo = require("../repository/category-repo");
 
 const router = Router();
 
+// READ
 router.get("/", async (req, res) => {
   try {
     const places = await placeRepo.readPlaces(req.query.category);
@@ -28,6 +30,7 @@ router.get("/:placeId", async (req, res) => {
   }
 });
 
+// CREATE
 router.post("/", upload.array("photos", 3), async (req, res) => {
   const t = await sequelize.transaction();
 
@@ -35,15 +38,19 @@ router.post("/", upload.array("photos", 3), async (req, res) => {
     console.log("create", req.body);
     const place = await placeRepo.createPlace(req.body, t);
     const photos = await photoRepo.createPhotos(req.files, place.placeId, t);
+    const categories = await categoryRepo.addCategoriesToPlace(
+      place,
+      req.body.categories,
+      t
+    );
 
-    console.log(place);
     await t.commit();
     res.status(201).json({
       placeId: place.placeId,
       lat: place.lat,
       lng: place.lng,
       name: place.name,
-      category: place.category,
+      categories: categories,
     });
   } catch (error) {
     await t.rollback();
@@ -52,6 +59,7 @@ router.post("/", upload.array("photos", 3), async (req, res) => {
   }
 });
 
+// UPDATE
 router.put("/:placeId", async (req, res) => {
   try {
     // TODO: BASE64 변환, 인터셉터에서 비밀번호 검사
@@ -72,6 +80,7 @@ router.put("/:placeId", async (req, res) => {
   }
 });
 
+// DELETE
 router.delete("/:placeId", async (req, res) => {
   try {
     // TODO: BASE64 변환, 인터셉터에서 비밀번호 검사

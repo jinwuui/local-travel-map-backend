@@ -28,16 +28,23 @@ router.get("/:placeId", async (req, res) => {
   }
 });
 
-router.post("/", upload.array("photos", 5), async (req, res) => {
+router.post("/", upload.array("photos", 3), async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
+    console.log("create", req.body);
     const place = await placeRepo.createPlace(req.body, t);
     const photos = await photoRepo.createPhotos(req.files, place.placeId, t);
 
+    console.log(place);
     await t.commit();
-
-    res.status(201).json({ placeId: place.placeId });
+    res.status(201).json({
+      placeId: place.placeId,
+      lat: place.lat,
+      lng: place.lng,
+      name: place.name,
+      category: place.category,
+    });
   } catch (error) {
     await t.rollback();
     console.log("-- error", error);

@@ -9,11 +9,11 @@ const Place = sequelize.define("Place", {
     primaryKey: true,
   },
   lat: {
-    type: DataTypes.DOUBLE,
+    type: DataTypes.FLOAT,
     allowNull: false,
   },
   lng: {
-    type: DataTypes.DOUBLE,
+    type: DataTypes.FLOAT,
     allowNull: false,
   },
   name: {
@@ -26,10 +26,6 @@ const Place = sequelize.define("Place", {
   },
   rating: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  category: {
-    type: DataTypes.STRING,
     allowNull: true,
   },
 });

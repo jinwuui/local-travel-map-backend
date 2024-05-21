@@ -10,7 +10,7 @@ const router = Router();
 // READ
 router.get("/", async (req, res) => {
   try {
-    const places = await placeRepo.readPlaces(req.query.category);
+    const places = await placeRepo.readPlacesWithCategories();
 
     if (places) res.status(200).json({ places: places });
     else res.status(204).json({ places: [] });

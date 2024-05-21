@@ -1,10 +1,24 @@
 const Place = require("../models/Place");
 
 module.exports = {
-  async readPlaces(category) {
-    return await Place.findAll({
-      attributes: ["placeId", "lat", "lng", "name", "category"],
+  async readPlacesWithCategories() {
+    const places = await Place.findAll({
+      attributes: ["placeId", "lat", "lng", "name"],
     });
+
+    const placesWithCategories = await Promise.all(
+      places.map(async (place) => {
+        const categories = await place.getCategories();
+
+        place.dataValues.categories = categories.map(
+          (category) => category.name
+        );
+
+        return place;
+      })
+    );
+
+    return placesWithCategories;
   },
 
   async readPlaceDetails(placeId) {

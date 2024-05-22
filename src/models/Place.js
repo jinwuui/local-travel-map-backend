@@ -26,7 +26,8 @@ const Place = sequelize.define("Place", {
   },
   rating: {
     type: DataTypes.INTEGER,
-    allowNull: true,
+    allowNull: false,
+    defaultValue: 0,
   },
 });
 

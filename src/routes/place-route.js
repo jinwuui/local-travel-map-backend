@@ -50,7 +50,8 @@ router.post("/", upload.array("photos", 3), async (req, res) => {
       lat: place.lat,
       lng: place.lng,
       name: place.name,
-      categories: categories,
+      categories: categories?.map((category) => category.name),
+      // TODO: place 생성 후엔 description, rating도 같이 보내서, 바로 details를 사이드뷰에 보여주기
     });
   } catch (error) {
     await t.rollback();

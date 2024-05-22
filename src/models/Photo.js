@@ -18,11 +18,11 @@ const Photo = sequelize.define("Photo", {
   },
   filename: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   order: {
     type: DataTypes.INTEGER,
-    allowNull: true,
+    allowNull: false,
   },
 });
 

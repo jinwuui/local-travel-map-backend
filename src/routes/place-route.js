@@ -1,6 +1,8 @@
 const { Router } = require("express");
+
 const sequelize = require("../config/database");
 const upload = require("../config/upload");
+
 const placeRepo = require("../repository/place-repo");
 const photoRepo = require("../repository/photo-repo");
 const categoryRepo = require("../repository/category-repo");
@@ -21,6 +23,17 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:placeId", async (req, res) => {
+  try {
+    const place = await placeRepo.readPlace(req.params.placeId);
+
+    res.status(200).json({ place: place });
+  } catch (error) {
+    console.log("-- error", error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.get("/:placeId/details", async (req, res) => {
   try {
     const placeDetails = await placeRepo.readPlaceDetails(req.params.placeId);
     res.status(200).json({ placeDetails: placeDetails });

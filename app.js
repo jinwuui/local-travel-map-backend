@@ -1,10 +1,13 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
 const { Place, Photo, Category, PlaceCategories } = require("./src/models");
 
 const app = express();
+
+app.use("/images", express.static(path.join(__dirname, "/public/images")));
 
 app.use(cors());
 
@@ -16,7 +19,7 @@ app.use(router);
 const PORT = 3000;
 
 sequelize
-  .sync({ force: true })
+  .sync({ force: false })
   .then(() => {
     console.log("Database & tables created!");
     app.listen(PORT, () => {

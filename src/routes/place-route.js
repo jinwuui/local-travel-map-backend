@@ -12,7 +12,14 @@ const router = Router();
 // READ
 router.get("/", async (req, res) => {
   try {
-    const places = await placeRepo.readPlacesWithCategories();
+    const params = req.query;
+    const whereClause = {};
+
+    if (params.category) {
+      whereClause["$Categories.name$"] = params.category;
+    }
+
+    const places = await placeRepo.readPlacesWithCategories(whereClause);
 
     if (places) res.status(200).json({ places: places });
     else res.status(204).json({ places: [] });

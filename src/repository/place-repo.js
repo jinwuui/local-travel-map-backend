@@ -1,4 +1,6 @@
 const Place = require("../models/Place");
+const Category = require("../models/Category");
+
 const Utils = require("../utils/utils");
 const {
   disassembleHangul,
@@ -6,9 +8,18 @@ const {
 } = require("@toss/hangul");
 
 module.exports = {
-  async readPlacesWithCategories() {
+  async readPlacesWithCategories(whereClause) {
     const places = await Place.findAll({
       attributes: ["placeId", "lat", "lng", "name"],
+      include: [
+        {
+          model: Category,
+          attributes: ["name"],
+          where: whereClause["$Categories.name$"]
+            ? { name: whereClause["$Categories.name$"] }
+            : undefined,
+        },
+      ],
     });
 
     const placesWithCategories = await Promise.all(

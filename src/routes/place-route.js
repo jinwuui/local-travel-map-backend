@@ -1,7 +1,7 @@
 const { Router } = require("express");
 
 const sequelize = require("../config/database");
-const upload = require("../config/upload");
+const { uploadAndGenerateThumbnail } = require("../config/upload");
 
 const placeRepo = require("../repository/place-repo");
 const photoRepo = require("../repository/photo-repo");
@@ -51,7 +51,7 @@ router.get("/:placeId/details", async (req, res) => {
 });
 
 // CREATE
-router.post("/", upload.array("photos", 3), async (req, res) => {
+router.post("/", uploadAndGenerateThumbnail, async (req, res) => {
   const t = await sequelize.transaction();
 
   try {

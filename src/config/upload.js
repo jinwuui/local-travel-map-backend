@@ -47,7 +47,7 @@ const uploadAndGenerateThumbnail = (req, res, next) => {
     }
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).send("No files uploaded.");
+      return next();
     }
 
     try {

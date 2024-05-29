@@ -8,6 +8,14 @@ const { Place, Photo, Category, PlaceCategories } = require("./src/models");
 const app = express();
 
 app.use("/images", express.static(path.join(__dirname, "/public/images")));
+app.use(
+  "/images/thumbnails",
+  express.static(path.join(__dirname, "/public/images/thumbnails"))
+);
+app.use(
+  "/images/originals",
+  express.static(path.join(__dirname, "/public/images/originals"))
+);
 
 app.use(cors());
 

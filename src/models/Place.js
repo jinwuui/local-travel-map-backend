@@ -43,6 +43,10 @@ const Place = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    country: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     indexes: [

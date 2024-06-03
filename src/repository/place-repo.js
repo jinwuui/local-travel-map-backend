@@ -2,6 +2,7 @@ const Place = require("../models/Place");
 const Category = require("../models/Category");
 
 const Utils = require("../utils/utils");
+const GeoUtils = require("../utils/geoUtils");
 const {
   disassembleHangul,
   disassembleHangulToGroups,
@@ -74,6 +75,10 @@ module.exports = {
     place.hanguls = Utils.convertToHangul(disassembledContent);
     place.chosungs = chosungs;
     place.alphabets = Utils.convertToAlphabet(disassembledContent);
+    place.country = await GeoUtils.getCountryName(
+      parseFloat(place.lat),
+      parseFloat(place.lng)
+    );
 
     return await Place.create(place, { transaction: t });
   },

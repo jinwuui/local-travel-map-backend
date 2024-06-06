@@ -40,7 +40,15 @@ module.exports = {
 
   async readPlace(placeId) {
     const place = await Place.findByPk(placeId, {
-      attributes: ["placeId", "lat", "lng", "name", "description", "rating"],
+      attributes: [
+        "placeId",
+        "lat",
+        "lng",
+        "name",
+        "description",
+        "rating",
+        "country",
+      ],
     });
 
     const categories = await place.getCategories();
@@ -56,7 +64,7 @@ module.exports = {
 
   async readPlaceDetails(placeId) {
     const placeDetails = await Place.findByPk(placeId, {
-      attributes: ["placeId", "description", "rating"],
+      attributes: ["placeId", "description", "rating", "country"],
     });
 
     const photos = await placeDetails.getPhotos({

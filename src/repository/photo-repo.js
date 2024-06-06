@@ -5,6 +5,7 @@ module.exports = {
     const photoData = photos.map((file, index) => ({
       placeId: placeId,
       filename: file.filename,
+
       order: index,
     }));
 

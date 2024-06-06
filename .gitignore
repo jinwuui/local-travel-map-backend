@@ -1,3 +1,7 @@
+# hide
+.env
+.env.dev
+
 # npm
 node_modules
 package-lock.json

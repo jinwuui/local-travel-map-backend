@@ -36,7 +36,7 @@ async function autocomplete({ hangul, chosung, alphabet }) {
   }
 
   return await Place.findAll({
-    attributes: ["placeId", "name", "description"],
+    attributes: ["placeId", "name", "description", "country"],
     where: {
       [Op.or]: conditions,
     },

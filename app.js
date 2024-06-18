@@ -9,6 +9,7 @@ const app = express();
 
 app.use(cors());
 
+// 정적 파일 서빙은 Nginx 에서 수행
 app.use("/images", express.static(path.join(__dirname, "/public/images")));
 app.use(
   "/images/thumbnails",

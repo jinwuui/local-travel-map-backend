@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Place = require("../models/Place");
+const UserPlaces = require("../models/UserPlaces");
 const bcrypt = require("bcrypt");
 
 module.exports = {
@@ -23,6 +25,30 @@ module.exports = {
     } catch (error) {
       console.error("Error finding or creating user:", error);
       throw error;
+    }
+  },
+
+  async toggleFavoritePlace(userId, placeId) {
+    const user = await User.findByPk(userId);
+    const place = await Place.findByPk(placeId);
+
+    if (!user) {
+      throw new Error("Invalid userId");
+    }
+    if (!place) {
+      throw new Error("Invalid placeId");
+    }
+
+    const favorite = await UserPlaces.findOne({
+      where: { UserUserId: userId, PlacePlaceId: placeId },
+    });
+
+    if (favorite) {
+      await favorite.destroy();
+      return false;
+    } else {
+      await UserPlaces.create({ UserUserId: userId, PlacePlaceId: placeId });
+      return true;
     }
   },
 };

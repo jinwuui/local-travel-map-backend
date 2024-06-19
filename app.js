@@ -3,7 +3,14 @@ const path = require("path");
 const cors = require("cors");
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
-const { Place, Photo, Category, PlaceCategories } = require("./src/models");
+const {
+  Place,
+  Photo,
+  Category,
+  PlaceCategories,
+  User,
+  UserPlaces,
+} = require("./src/models");
 
 const app = express();
 

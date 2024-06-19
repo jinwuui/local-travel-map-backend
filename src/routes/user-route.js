@@ -32,4 +32,19 @@ router.post("/", async (req, res) => {
   }
 });
 
+// TOGGLE FAVORITE PLACE
+router.post("/:userId/favorites", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const placeId = req.body.placeId;
+
+    const result = await userRepo.toggleFavoritePlace(userId, placeId);
+
+    res.status(200).json({ isFavorite: result });
+  } catch (error) {
+    console.log("-- error", error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = router;

@@ -19,7 +19,12 @@ router.get("/", async (req, res) => {
       whereClause["$Categories.name$"] = params.category;
     }
 
-    const places = await placeRepo.readPlacesWithCategories(whereClause);
+    const userId = req.userId;
+
+    const places = await placeRepo.readPlacesWithCategories(
+      whereClause,
+      userId
+    );
 
     if (places) res.status(200).json({ places: places });
     else res.status(204).json({ places: [] });

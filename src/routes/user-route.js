@@ -7,9 +7,9 @@ const userRepo = require("../repository/user-repo");
 const router = Router();
 
 // READ
-router.get("/:userId", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const user = await userRepo.readUser(req.params.userId);
+    const user = await userRepo.readUser(req.userId);
 
     res.status(200).json({ user: user });
   } catch (error) {
@@ -18,7 +18,7 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-// CREATE
+// LOGIN OR SIGNUP
 router.post("/", async (req, res) => {
   try {
     console.log("login", req.body);
@@ -33,10 +33,10 @@ router.post("/", async (req, res) => {
 });
 
 // TOGGLE FAVORITE PLACE
-router.post("/:userId/favorites", async (req, res) => {
+router.post("/favorites/:placeId", async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const placeId = req.body.placeId;
+    const userId = req.userId;
+    const placeId = req.params.placeId;
 
     const result = await userRepo.toggleFavoritePlace(userId, placeId);
 

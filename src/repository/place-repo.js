@@ -1,5 +1,6 @@
 const Place = require("../models/Place");
 const Category = require("../models/Category");
+const UserPlaces = require("../models/UserPlaces");
 
 const Utils = require("../utils/utils");
 const GeoUtils = require("../utils/geoUtils");
@@ -9,7 +10,7 @@ const {
 } = require("@toss/hangul");
 
 module.exports = {
-  async readPlacesWithCategories(whereClause) {
+  async readPlacesWithCategories(whereClause, userId) {
     const places = await Place.findAll({
       attributes: ["placeId", "lat", "lng", "name"],
       include: [
@@ -30,6 +31,21 @@ module.exports = {
         place.dataValues.categories = categories.map(
           (category) => category.name
         );
+
+        // 로그인 상태일 경우 즐겨찾기 여부 확인
+
+        if (userId) {
+          console.log("user:", userId);
+          const favorite = await UserPlaces.findOne({
+            where: {
+              userId: userId,
+              placeId: place.placeId,
+            },
+          });
+          place.dataValues.isFavorite = !!favorite; // true or false
+        } else {
+          console.log("guest");
+        }
 
         return place;
       })

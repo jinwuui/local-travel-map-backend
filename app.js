@@ -11,6 +11,7 @@ const {
   User,
   UserPlaces,
 } = require("./src/models");
+const extractUserId = require("./src/middlewares/auth");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(extractUserId);
 app.use(router);
 
 const PORT = 3000;

@@ -40,14 +40,14 @@ module.exports = {
     }
 
     const favorite = await UserPlaces.findOne({
-      where: { UserUserId: userId, PlacePlaceId: placeId },
+      where: { userId, placeId },
     });
 
     if (favorite) {
       await favorite.destroy();
       return false;
     } else {
-      await UserPlaces.create({ UserUserId: userId, PlacePlaceId: placeId });
+      await UserPlaces.create({ userId, placeId });
       return true;
     }
   },

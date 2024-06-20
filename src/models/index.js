@@ -14,7 +14,15 @@ Photo.belongsTo(Place);
 Place.belongsToMany(Category, { through: PlaceCategories });
 Category.belongsToMany(Place, { through: PlaceCategories });
 
-User.belongsToMany(Place, { through: UserPlaces });
-Place.belongsToMany(User, { through: UserPlaces });
+User.belongsToMany(Place, {
+  through: UserPlaces,
+  foreignKey: "userId",
+  otherKey: "placeId",
+});
+Place.belongsToMany(User, {
+  through: UserPlaces,
+  foreignKey: "placeId",
+  otherKey: "userId",
+});
 
 module.exports = { Photo, Place, Category, PlaceCategories, User, UserPlaces };

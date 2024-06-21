@@ -34,9 +34,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/favorites", async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) throw Error("user not exist");
+
+    console.log("favorite", userId);
+    const places = await placeRepo.readFavoritePlaces(userId);
+
+    if (places) res.status(200).json({ places: places });
+    else res.status(204).json({ places: [] });
+  } catch (error) {
+    console.log("-- error", error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 router.get("/:placeId", async (req, res) => {
   try {
-    const place = await placeRepo.readPlace(req.params.placeId);
+    const place = await placeRepo.readPlace(req.params.placeId, req.userId);
 
     res.status(200).json({ place: place });
   } catch (error) {
@@ -47,7 +63,10 @@ router.get("/:placeId", async (req, res) => {
 
 router.get("/:placeId/details", async (req, res) => {
   try {
-    const placeDetails = await placeRepo.readPlaceDetails(req.params.placeId);
+    const placeDetails = await placeRepo.readPlaceDetails(
+      req.params.placeId,
+      req.userId
+    );
     res.status(200).json({ placeDetails: placeDetails });
   } catch (error) {
     console.log("-- error", error);

@@ -33,7 +33,6 @@ module.exports = {
         );
 
         // 로그인 상태일 경우 즐겨찾기 여부 확인
-
         if (userId) {
           console.log("user:", userId);
           const favorite = await UserPlaces.findOne({
@@ -54,7 +53,39 @@ module.exports = {
     return placesWithCategories;
   },
 
-  async readPlace(placeId) {
+  async readFavoritePlaces(userId) {
+    const userPlaces = await UserPlaces.findAll({
+      where: {
+        userId: userId,
+      },
+      attributes: ["placeId"],
+    });
+
+    const placeIds = userPlaces.map((up) => up.placeId);
+
+    const places = await Place.findAll({
+      attributes: ["placeId", "name", "description", "rating", "country"],
+      where: {
+        placeId: placeIds,
+      },
+    });
+
+    const placesWithPhotos = await Promise.all(
+      places.map(async (place) => {
+        const photos = await place.getPhotos({
+          attributes: ["photoId", "filename", "order"],
+        });
+
+        place.dataValues.photos = photos;
+        place.dataValues.isFavorite = true;
+        return place;
+      })
+    );
+
+    return placesWithPhotos;
+  },
+
+  async readPlace(placeId, userId) {
     const place = await Place.findByPk(placeId, {
       attributes: [
         "placeId",
@@ -68,17 +99,27 @@ module.exports = {
     });
 
     const categories = await place.getCategories();
+    place.dataValues.categories = categories.map((category) => category.name);
+
     const photos = await place.getPhotos({
       attributes: ["photoId", "filename", "order"],
     });
-
-    place.dataValues.categories = categories.map((category) => category.name);
     place.dataValues.photos = photos;
+
+    if (userId) {
+      const favorite = await UserPlaces.findOne({
+        where: {
+          userId: userId,
+          placeId: placeId,
+        },
+      });
+      place.dataValues.isFavorite = !!favorite; // true or false
+    }
 
     return place;
   },
 
-  async readPlaceDetails(placeId) {
+  async readPlaceDetails(placeId, userId) {
     const placeDetails = await Place.findByPk(placeId, {
       attributes: ["placeId", "description", "rating", "country"],
     });
@@ -86,8 +127,18 @@ module.exports = {
     const photos = await placeDetails.getPhotos({
       attributes: ["photoId", "filename", "order"],
     });
-
     placeDetails.dataValues.photos = photos;
+
+    if (userId) {
+      const favorite = await UserPlaces.findOne({
+        where: {
+          userId: userId,
+          placeId: placeId,
+        },
+      });
+      placeDetails.dataValues.isFavorite = !!favorite; // true or false
+    }
+
     return placeDetails;
   },
 

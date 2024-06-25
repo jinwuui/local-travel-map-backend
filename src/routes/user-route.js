@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 
     res.status(200).json({ user: user });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
 
     res.status(result.isNewUser ? 201 : 200).json(result);
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -42,7 +42,7 @@ router.post("/favorites/:placeId", async (req, res) => {
 
     res.status(200).json({ isFavorite: result });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });

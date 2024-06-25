@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
     if (places) res.status(200).json({ places: places });
     else res.status(204).json({ places: [] });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -45,7 +45,7 @@ router.get("/favorites", async (req, res) => {
     if (places) res.status(200).json({ places: places });
     else res.status(204).json({ places: [] });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -56,7 +56,7 @@ router.get("/:placeId", async (req, res) => {
 
     res.status(200).json({ place: place });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -69,7 +69,7 @@ router.get("/:placeId/details", async (req, res) => {
     );
     res.status(200).json({ placeDetails: placeDetails });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -99,7 +99,7 @@ router.post("/", uploadAndGenerateThumbnail, async (req, res) => {
     });
   } catch (error) {
     await t.rollback();
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -120,7 +120,7 @@ router.put("/:placeId", async (req, res) => {
     if (result) res.status(200).json({ placeId: req.params.placeId });
     else throw Error({ message: "수정할 데이터가 존재하지 않습니다" });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -135,7 +135,7 @@ router.delete("/:placeId", async (req, res) => {
     if (result) res.status(204).json({ placeId: placeId });
     else throw Error({ message: "삭제할 데이터가 존재하지 않습니다" });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });

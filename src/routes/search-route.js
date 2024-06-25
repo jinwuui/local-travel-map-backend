@@ -17,7 +17,7 @@ router.get("/autocomplete", async (req, res) => {
 
     res.status(200).json({ suggestions: suggestions });
   } catch (error) {
-    console.log("-- error", error);
+    console.error("-- error", error);
     res.status(400).json({ message: error.message });
   }
 });

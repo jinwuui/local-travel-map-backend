@@ -7,6 +7,9 @@ const PlaceCategories = require("./PlaceCategories");
 const User = require("./User");
 const UserPlaces = require("./UserPlaces");
 
+const Announcement = require("./Announcement");
+const Feedback = require("./Feedback");
+
 // 관계 설정
 Place.hasMany(Photo, { foreignKey: "placeId" });
 Photo.belongsTo(Place);
@@ -25,4 +28,13 @@ Place.belongsToMany(User, {
   otherKey: "userId",
 });
 
-module.exports = { Photo, Place, Category, PlaceCategories, User, UserPlaces };
+module.exports = {
+  Photo,
+  Place,
+  Category,
+  PlaceCategories,
+  User,
+  UserPlaces,
+  Announcement,
+  Feedback,
+};

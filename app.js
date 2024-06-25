@@ -10,6 +10,8 @@ const {
   PlaceCategories,
   User,
   UserPlaces,
+  Announcement,
+  Feedback,
 } = require("./src/models");
 const extractUserId = require("./src/middlewares/auth");
 

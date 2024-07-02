@@ -13,7 +13,13 @@ async function calculateAndSaveEmbedding(place, categories) {
     const categoryNames = (categories || [])
       .map((category) => category.name)
       .join(" | ");
-    const text = `${place.name} | ${place.description} | ${place.country} | ${categoryNames}`;
+
+    let text = `${place.name} | ${place.description} | ${place.country}`;
+    if (categoryNames) {
+      text += ` | ${categoryNames}`;
+    }
+    text = text.replace(/[\r\n]+/g, " ").trim();
+
     console.log("embedding text", text);
 
     const res = await axios.post(

@@ -6,6 +6,7 @@ const { uploadAndGenerateThumbnail } = require("../config/upload");
 const placeRepo = require("../repository/place-repo");
 const photoRepo = require("../repository/photo-repo");
 const categoryRepo = require("../repository/category-repo");
+const { calculateAndSaveEmbedding } = require("../utils/embeddingUtils");
 
 const router = Router();
 
@@ -87,6 +88,8 @@ router.post("/", uploadAndGenerateThumbnail, async (req, res) => {
       req.body.categories,
       t
     );
+
+    calculateAndSaveEmbedding(place, categories);
 
     await t.commit();
     res.status(201).json({

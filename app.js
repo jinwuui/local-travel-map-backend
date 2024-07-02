@@ -3,6 +3,7 @@ const path = require("path");
 const cors = require("cors");
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
+const pgClient = require("./src/config/postgresql.js");
 const {
   Place,
   Photo,
@@ -38,14 +39,20 @@ app.use(router);
 
 const PORT = 3000;
 
-sequelize
-  .sync({ force: false })
-  .then(() => {
-    console.log("Database & tables created!");
+const connectDatabases = async () => {
+  try {
+    await sequelize.sync({ force: false });
+    console.log("Sequelize: Database & tables created!");
+
+    await pgClient.connect();
+    console.log("PostgreSQL: Connected successfully!");
+
     app.listen(PORT, () => {
       console.log(`Example app listening on port ${PORT}`);
     });
-  })
-  .catch((error) => {
-    console.error("Unable to create database or tables:", error);
-  });
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
+  }
+};
+
+connectDatabases();

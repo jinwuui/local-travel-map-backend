@@ -3,46 +3,103 @@ const { disassembleHangul } = require("@toss/hangul");
 
 const Utils = require("../utils/utils");
 const Place = require("../models/Place");
+const { findSimilarPlaces } = require("../utils/embeddingUtils");
 
-async function autocomplete({ hangul, chosung, alphabet }) {
-  const conditions = [];
+async function autocompleteByPattern({ hangul, chosung, alphabet }) {
+  try {
+    const conditions = [];
 
-  if (hangul) {
-    conditions.push({
-      hanguls: {
-        [Op.like]: `%${hangul}%`,
+    if (hangul) {
+      conditions.push({
+        hanguls: {
+          [Op.like]: `%${hangul}%`,
+        },
+      });
+    }
+
+    if (chosung) {
+      conditions.push({
+        chosungs: {
+          [Op.like]: `%${chosung}%`,
+        },
+      });
+    }
+
+    if (alphabet) {
+      conditions.push({
+        alphabets: {
+          [Op.like]: `%${alphabet}%`,
+        },
+      });
+    }
+
+    if (conditions.length === 0) {
+      return [];
+    }
+
+    return await Place.findAll({
+      attributes: ["placeId", "name", "description", "country"],
+      where: {
+        [Op.or]: conditions,
       },
+      limit: 7,
     });
-  }
-
-  if (chosung) {
-    conditions.push({
-      chosungs: {
-        [Op.like]: `%${chosung}%`,
-      },
-    });
-  }
-
-  if (alphabet) {
-    conditions.push({
-      alphabets: {
-        [Op.like]: `%${alphabet}%`,
-      },
-    });
-  }
-
-  if (conditions.length === 0) {
+  } catch (error) {
+    console.error("pattern autocomplete error:", error);
     return [];
   }
-
-  return await Place.findAll({
-    attributes: ["placeId", "name", "description", "country"],
-    where: {
-      [Op.or]: conditions,
-    },
-    limit: 7,
-  });
 }
+
+async function autocompleteByEmbedding(query) {
+  try {
+    const similarPlaceIds = await findSimilarPlaces(query);
+
+    const places = await Place.findAll({
+      attributes: ["placeId", "name", "description", "country"],
+      where: {
+        placeId: {
+          [Op.in]: similarPlaceIds,
+        },
+      },
+    });
+
+    const placeMap = new Map();
+    places.forEach((place) => {
+      placeMap.set(place.placeId, place);
+    });
+
+    const sortedPlaces = similarPlaceIds.map((placeId) =>
+      placeMap.get(placeId)
+    );
+    return sortedPlaces;
+  } catch (error) {
+    console.error("embedding autocomplete error:", error);
+    return [];
+  }
+}
+
+const mergeResults = (primary, secondary) => {
+  const seen = new Set();
+  const result = [];
+
+  // primary 배열을 먼저 처리
+  primary.forEach((item) => {
+    if (!seen.has(item.placeId)) {
+      seen.add(item.placeId);
+      result.push(item);
+    }
+  });
+
+  // secondary 배열을 처리
+  secondary.forEach((item) => {
+    if (!seen.has(item.placeId)) {
+      seen.add(item.placeId);
+      result.push(item);
+    }
+  });
+
+  return result;
+};
 
 module.exports = {
   async getAutocompleteSuggestions(query) {
@@ -59,21 +116,26 @@ module.exports = {
     console.log("chosungQuery: ", chosungQuery);
     console.log("alphabetQuery: ", alphabetQuery);
 
-    const queryParams = {
-      alphabet: alphabetQuery,
-    };
+    const queryParams = { alphabet: alphabetQuery };
 
-    if (hangulQuery.length === chosungQuery.length) {
-      // 초성으로 검색해야 초성 검색 실행
+    const isChosungSearch = hangulQuery.length === chosungQuery.length;
+
+    if (isChosungSearch) {
       queryParams["chosung"] = chosungQuery;
     } else {
-      // 초성으로 검색한게 아니라면 한글 검색 실행
       queryParams["hangul"] = hangulQuery;
     }
 
-    const result = await autocomplete(queryParams);
-    return result;
+    const [resultByPattern, resultByEmbedding] = await Promise.all([
+      autocompleteByPattern(queryParams),
+      autocompleteByEmbedding(query),
+    ]);
 
+    const finalResults = isChosungSearch
+      ? mergeResults(resultByPattern, resultByEmbedding)
+      : mergeResults(resultByEmbedding, resultByPattern);
+
+    return finalResults;
     // 1. 한글 검색
     // 1-1. 음절 (hanguls 필드, 공백 제거해서 넣어두기)
     // 1-2. 초성 검색 (chosungs 필드, 공백 제거해서 넣어두기)

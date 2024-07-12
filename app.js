@@ -5,6 +5,7 @@ require("dotenv").config();
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
 const pgClient = require("./src/config/postgresql.js");
+const { connectRedis } = require("./src/config/redis.js");
 const {
   Place,
   Photo,
@@ -49,11 +50,15 @@ const PORT = 3000;
 
 const connectDatabases = async () => {
   try {
-    await sequelize.sync({ force: false });
-    console.log("Sequelize: Database & tables created!");
+    await sequelize.sync({ force: false }).then(() => {
+      console.log("DB - Sequelize:  Connected successfully!");
+    });
 
-    await pgClient.connect();
-    console.log("PostgreSQL: Connected successfully!");
+    await pgClient.connect().then(() => {
+      console.log("DB - PostgreSQL: Connected successfully!");
+    });
+
+    await connectRedis();
 
     app.listen(PORT, () => {
       console.log(`Example app listening on port ${PORT}`);

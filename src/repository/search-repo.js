@@ -103,6 +103,8 @@ const mergeResults = (primary, secondary) => {
 
 module.exports = {
   async getAutocompleteSuggestions(query) {
+    // 캐시 여부 확인
+
     // 0-1. 쿼리에서 공백제거 (프론트에서 하자)
     const queryWithoutSpace = Utils.removeAllSpace(query);
     const disassembledQuery = disassembleHangul(queryWithoutSpace);

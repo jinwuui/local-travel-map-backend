@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
+require("dotenv").config();
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
 const pgClient = require("./src/config/postgresql.js");
@@ -18,7 +19,14 @@ const extractUserId = require("./src/middlewares/auth");
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["date"],
+};
+
+app.use(cors(corsOptions));
 
 // 정적 파일 서빙은 Nginx 에서 수행
 app.use("/images", express.static(path.join(__dirname, "/public/images")));

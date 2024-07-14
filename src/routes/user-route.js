@@ -6,18 +6,6 @@ const userRepo = require("../repository/user-repo");
 
 const router = Router();
 
-// READ
-router.get("/", async (req, res) => {
-  try {
-    const user = await userRepo.readUser(req.userId);
-
-    res.status(200).json({ user: user });
-  } catch (error) {
-    console.error("-- error", error);
-    res.status(400).json({ message: error.message });
-  }
-});
-
 // LOGIN OR SIGNUP
 router.post("/", async (req, res) => {
   try {

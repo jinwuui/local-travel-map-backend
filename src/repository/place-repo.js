@@ -34,7 +34,6 @@ module.exports = {
 
         // 로그인 상태일 경우 즐겨찾기 여부 확인
         if (userId) {
-          console.log("user:", userId);
           const favorite = await UserPlaces.findOne({
             where: {
               userId: userId,
@@ -42,8 +41,6 @@ module.exports = {
             },
           });
           place.dataValues.isFavorite = !!favorite; // true or false
-        } else {
-          console.log("guest");
         }
 
         return place;

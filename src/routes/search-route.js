@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const { performance } = require("perf_hooks");
 
 const placeRepo = require("../repository/place-repo");
 const photoRepo = require("../repository/photo-repo");
@@ -9,8 +10,9 @@ const router = Router();
 
 // READ
 router.get("/autocomplete", async (req, res) => {
+  const start = performance.now();
+
   try {
-    console.log("autocomplte", req.query);
     const suggestions = await searchRepo.getAutocompleteSuggestions(
       req.query.query
     );
@@ -19,6 +21,12 @@ router.get("/autocomplete", async (req, res) => {
   } catch (error) {
     console.error("-- error", error);
     res.status(400).json({ message: error.message });
+  } finally {
+    const end = performance.now();
+    const duration = end - start;
+    const formattedTime = `${duration.toFixed(2)} ms`.padStart(10);
+
+    console.log(` - Time: ${formattedTime}  ("${req.query.query}")`);
   }
 });
 

@@ -86,7 +86,6 @@ async function findSimilarPlaces(query) {
 
     const values = [pgvector.toSql(embedding), similarityThreshold];
     const result = await client.query(queryText, values);
-    console.log("score", result.rows);
 
     return result.rows.map((row) => row.placeid);
   } catch (error) {

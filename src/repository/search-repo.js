@@ -16,8 +16,10 @@ async function getAutocompleteSuggestions(query) {
   const cachedResults = await redisClient.get(queryKey);
 
   if (cachedResults) {
-    console.log("Cache hit");
+    process.stdout.write("[ Cache Hit  ]");
     return JSON.parse(cachedResults);
+  } else {
+    process.stdout.write("[ Cache Miss ]");
   }
 
   // 1. '부분 일치' 검색을 위해 쿼리 분해
@@ -27,10 +29,6 @@ async function getAutocompleteSuggestions(query) {
   const hangulQuery = Utils.convertToHangul(disassembledQuery);
   const chosungQuery = Utils.convertToChosung(disassembledQuery);
   const alphabetQuery = Utils.convertToAlphabet(disassembledQuery);
-
-  console.log("hangulQuery: ", hangulQuery);
-  console.log("chosungQuery: ", chosungQuery);
-  console.log("alphabetQuery: ", alphabetQuery);
 
   const queryParams = { alphabet: alphabetQuery };
 

@@ -18,7 +18,6 @@ module.exports = {
     );
 
     await place.addCategories(categories, { transaction: t });
-    console.log("카테고리들과 장소 매핑 성공");
     return categories;
   },
 };

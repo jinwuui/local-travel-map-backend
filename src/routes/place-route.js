@@ -40,7 +40,6 @@ router.get("/favorites", async (req, res) => {
     const userId = req.userId;
     if (!userId) throw Error("user not exist");
 
-    console.log("favorite", userId);
     const places = await placeRepo.readFavoritePlaces(userId);
 
     if (places) res.status(200).json({ places: places });
@@ -80,7 +79,6 @@ router.post("/", uploadAndGenerateThumbnail, async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
-    console.log("create", req.body);
     const place = await placeRepo.createPlace(req.body, t);
     const photos = await photoRepo.createPhotos(req.files, place.placeId, t);
     const categories = await categoryRepo.addCategoriesToPlace(

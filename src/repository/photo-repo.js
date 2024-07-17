@@ -9,7 +9,6 @@ module.exports = {
       order: index,
     }));
 
-    console.log("createPhotos", photoData, placeId);
     return await Photo.bulkCreate(photoData, { transaction: t });
   },
 };

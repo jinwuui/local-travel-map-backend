@@ -17,6 +17,7 @@ const {
   Feedback,
 } = require("./src/models");
 const extractUserId = require("./src/middlewares/auth");
+const logger = require("./src/middlewares/logger");
 
 const app = express();
 
@@ -28,6 +29,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+app.use(logger);
 
 // 정적 파일 서빙은 Nginx 에서 수행
 app.use("/images", express.static(path.join(__dirname, "/public/images")));

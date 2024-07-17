@@ -20,7 +20,7 @@ async function calculateAndSaveEmbedding(place, categories) {
     }
     text = text.replace(/[\r\n]+/g, " ").trim();
 
-    console.log("embedding text", text);
+    console.log("    embedding text", text);
 
     const res = await axios.post(
       "https://api.openai.com/v1/embeddings",

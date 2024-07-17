@@ -9,7 +9,7 @@ const router = Router();
 // LOGIN OR SIGNUP
 router.post("/", async (req, res) => {
   try {
-    console.log("login", req.body);
+    console.log("    login", req.body);
     const { username, password } = req.body;
     const result = await userRepo.findOrCreateUser(username, password);
 

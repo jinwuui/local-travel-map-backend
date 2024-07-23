@@ -4,6 +4,7 @@ const logger = (req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
+    console.log(`    - ${res.statusCode} ${res.statusMessage}`);
     console.log(`    - ${duration} ms`);
   });
 

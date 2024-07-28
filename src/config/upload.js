@@ -2,50 +2,60 @@ const multer = require("multer");
 const path = require("path");
 const sharp = require("sharp");
 const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
 
 const originalsDir = path.resolve(__dirname, "../../public/images/originals/");
-const thumbnailsDir = path.resolve(
-  __dirname,
-  "../../public/images/thumbnails/"
-);
+const thumbnailDir = path.resolve(__dirname, "../../public/images/resize/t/");
+const smallDir = path.resolve(__dirname, "../../public/images/resize/s/");
+const mediumDir = path.resolve(__dirname, "../../public/images/resize/m/");
+const largeDir = path.resolve(__dirname, "../../public/images/resize/l/");
 
-// Ensure originals + thumbnails directory exists
-if (!fs.existsSync(originalsDir)) {
-  fs.mkdirSync(originalsDir, { recursive: true });
-}
-if (!fs.existsSync(thumbnailsDir)) {
-  fs.mkdirSync(thumbnailsDir, { recursive: true });
-}
+const ensureDirectoryExistence = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+[originalsDir, thumbnailDir, smallDir, mediumDir, largeDir].forEach(
+  ensureDirectoryExistence
+);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, originalsDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename =
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
+    const filename = "photo-" + uuidv4() + path.extname(file.originalname);
     cb(null, filename);
   },
 });
 
 const upload = multer({ storage: storage });
 
-const generateThumbnail = (
+const resizeImage = (
   filePath,
-  thumbnailPath,
-  width = 300,
-  height = 300
+  resizePath,
+  resizeLimit,
+  fit = sharp.fit.inside
 ) => {
-  return sharp(filePath).resize(width, height).toFile(thumbnailPath);
+  const resizeOptions = {
+    width: resizeLimit,
+    height: resizeLimit,
+    fit: fit,
+    withoutEnlargement: true,
+  };
+
+  return sharp(filePath)
+    .resize(resizeOptions)
+    .toFormat("webp")
+    .toFile(resizePath);
 };
 
-const uploadAndGenerateThumbnail = (req, res, next) => {
+const uploadAndGenerateResize = (req, res, next) => {
   upload.array("photos", 3)(req, res, async (err) => {
     if (err) {
       return next(err);
     }
-
     if (!req.files || req.files.length === 0) {
       return next();
     }
@@ -54,18 +64,33 @@ const uploadAndGenerateThumbnail = (req, res, next) => {
       await Promise.all(
         req.files.map((file) => {
           const originalPath = file.path;
-          const thumbnailPath = path.join(
-            thumbnailsDir,
-            path.basename(originalPath)
-          );
-          return generateThumbnail(originalPath, thumbnailPath);
+          const thumbnailPath = getResizedImagePath(originalPath, thumbnailDir);
+          const smallPath = getResizedImagePath(originalPath, smallDir);
+          const mediumPath = getResizedImagePath(originalPath, mediumDir);
+          const largePath = getResizedImagePath(originalPath, largeDir);
+
+          resizeImage(originalPath, thumbnailPath, 320, sharp.fit.cover);
+          resizeImage(originalPath, smallPath, 640);
+          resizeImage(originalPath, mediumPath, 1280);
+          resizeImage(originalPath, largePath, 1920);
         })
       );
       next();
-    } catch (thumbnailErr) {
-      next(thumbnailErr);
+    } catch (resizeError) {
+      next(resizeError);
     }
   });
 };
 
-module.exports = { uploadAndGenerateThumbnail };
+function getResizedImagePath(originalImagePath, targetDirectory) {
+  const extension = path.extname(originalImagePath);
+  const baseName = path.basename(originalImagePath, extension);
+
+  const closestFolderName = path.basename(targetDirectory);
+
+  const newFileName = `${baseName}-${closestFolderName}.webp`;
+
+  return path.join(targetDirectory, newFileName);
+}
+
+module.exports = { uploadAndGenerateResize };

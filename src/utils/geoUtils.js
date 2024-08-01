@@ -1,5 +1,6 @@
 const axios = require("axios");
-const GOOGLE_API_KEY = "AIzaSyA7kE8k5LTUFmxVvPAxAcMm6UBv98rOoVg";
+
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 const dokdoBounds = {
   latMin: 37.237146,

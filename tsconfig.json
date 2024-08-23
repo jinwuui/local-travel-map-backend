@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES6", // 컴파일된 JavaScript의 목표 버전
+    "module": "commonjs", // Node.js에서는 commonjs 모듈 시스템 사용
+    "rootDir": "./src", // TypeScript 소스 파일의 루트 디렉터리
+    "outDir": "./dist", // 컴파일된 JavaScript 파일의 출력 디렉터리
+    "strict": true, // 엄격한 타입 검사를 활성화
+    "esModuleInterop": true, // ES6 모듈을 CommonJS와 호환시키기 위해 필요
+    "skipLibCheck": true, // 타입 정의 파일을 검사하지 않음
+    "forceConsistentCasingInFileNames": true, // 파일 이름 대소문자 일관성 강제
+    "allowJs": true, // JavaScript 파일을 허용
+    "checkJs": false, // JavaScript 파일의 타입 검사 비활성화
+    "resolveJsonModule": true, // JSON 파일을 import할 수 있도록 설정
+    "isolatedModules": true, // 각 파일을 개별 모듈로 처리 (특히 babel을 사용하거나 webpack과 함께 사용할 때 유용)
+    "noEmit": true // TypeScript 파일 컴파일 시 파일을 생성하지 않음 (실행은 ts-node-dev로 처리)
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

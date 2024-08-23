@@ -47,10 +47,15 @@ const Place = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    embedding: {
+      type: DataTypes.BLOB,
+      allowNull: true,
+    },
   },
   {
     indexes: [
       {
+        name: "places_name_index",
         unique: false,
         fields: ["name"],
       },

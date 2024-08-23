@@ -12,8 +12,8 @@ const Photo = sequelize.define("Photo", {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: "Places", // 테이블 이름
-      key: "placeId",
+      model: "places", // 테이블 이름
+      key: "place_id",
     },
   },
   filename: {

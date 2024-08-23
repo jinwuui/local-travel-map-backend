@@ -7,16 +7,16 @@ const UserPlaces = sequelize.define("UserPlaces", {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: "Users", // 'Users' should match the table name of your User model
-      key: "userId",
+      model: "users", // 테이블 이름
+      key: "user_id",
     },
   },
   placeId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: "Places", // 'Places' should match the table name of your Place model
-      key: "placeId",
+      model: "places", // 테이블 이름
+      key: "place_id",
     },
   },
 });

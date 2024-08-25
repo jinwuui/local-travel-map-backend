@@ -1,6 +1,7 @@
 const pgvector = require("pgvector/pg");
 const axios = require("axios");
 const sequelize = require("../config/database");
+const { redisClient } = require("../config/redis.js");
 require("dotenv").config();
 
 const { QueryTypes } = require("sequelize");
@@ -8,8 +9,20 @@ const { QueryTypes } = require("sequelize");
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_EMBEDDING_API_URL = "https://api.openai.com/v1/embeddings";
 const EMBEDDING_MODEL = "text-embedding-3-large";
+const CACHE_EXPIRATION = 90 * 24 * 60 * 60;
 
 async function fetchEmbedding(text) {
+  const cacheKey = `embedding:${text}`;
+
+  const cachedEmbedding = await redisClient.get(cacheKey);
+
+  if (cachedEmbedding) {
+    process.stdout.write("[ Cache Hit : text-embedding ]");
+    return JSON.parse(cachedEmbedding);
+  } else {
+    process.stdout.write("[ Cache Miss: text-embedding ]");
+  }
+
   try {
     const response = await axios.post(
       OPENAI_EMBEDDING_API_URL,
@@ -25,10 +38,16 @@ async function fetchEmbedding(text) {
       }
     );
 
-    return response.data.data[0].embedding;
+    const embeddingValue = response.data.data[0].embedding;
+
+    await redisClient.set(cacheKey, JSON.stringify(embeddingValue), {
+      EX: CACHE_EXPIRATION,
+    });
+
+    return embeddingValue;
   } catch (error) {
     console.error("Error fetching embedding from OpenAI:", error);
-    throw new Error("Failed to fetch embedding");
+    throw new Error("Failed to fetch embedding from OpenAI");
   }
 }
 

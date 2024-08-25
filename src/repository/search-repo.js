@@ -6,18 +6,20 @@ const Place = require("../models/Place");
 const { findSimilarPlaces } = require("../utils/embeddingUtils");
 const { redisClient } = require("../config/redis.js");
 
+const CACHE_EXPIRATION = 60 * 30;
+
 async function getAutocompleteSuggestions(query) {
   // 0. 쿼리에서 공백제거 (프론트에서 하자)
   const queryWithoutSpace = Utils.removeAllSpace(query);
 
   // 0-1. Redis 캐시 여부 확인
-  const queryKey = `autocomplete:${queryWithoutSpace}`;
+  const cacheKey = `autocomplete:${queryWithoutSpace}`;
 
-  const cachedResults = await redisClient.get(queryKey);
+  const cachedSuggestions = await redisClient.get(cacheKey);
 
-  if (cachedResults) {
+  if (cachedSuggestions) {
     process.stdout.write("[ Cache Hit  ]");
-    return JSON.parse(cachedResults);
+    return JSON.parse(cachedSuggestions);
   } else {
     process.stdout.write("[ Cache Miss ]");
   }
@@ -50,8 +52,8 @@ async function getAutocompleteSuggestions(query) {
     ? mergeResults(resultByPattern, resultByEmbedding)
     : mergeResults(resultByEmbedding, resultByPattern);
 
-  await redisClient.set(queryKey, JSON.stringify(finalResults), {
-    EX: 600,
+  await redisClient.set(cacheKey, JSON.stringify(finalResults), {
+    EX: CACHE_EXPIRATION,
   });
 
   return finalResults;

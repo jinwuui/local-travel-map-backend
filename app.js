@@ -4,7 +4,6 @@ const cors = require("cors");
 require("dotenv").config();
 const router = require("./src/routes/router.js");
 const sequelize = require("./src/config/database.js");
-const pgClient = require("./src/config/postgresql.js");
 const { connectRedis } = require("./src/config/redis.js");
 const {
   Place,
@@ -55,10 +54,6 @@ const connectDatabases = async () => {
   try {
     await sequelize.sync({ force: false }).then(() => {
       console.log("DB - Sequelize:  Connected successfully!");
-    });
-
-    await pgClient.connect().then(() => {
-      console.log("DB - PostgreSQL: Connected successfully!");
     });
 
     await connectRedis();

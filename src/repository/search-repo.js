@@ -107,13 +107,14 @@ async function autocompleteByPattern({ hangul, chosung, alphabet }) {
       return [];
     }
 
-    return await Place.findAll({
+    const suggestions = await Place.findAll({
       attributes: ["placeId", "name", "description", "country"],
       where: {
         [Op.or]: conditions,
       },
       limit: 7,
     });
+    return suggestions;
   } catch (error) {
     console.error("pattern autocomplete error:", error);
     return [];
@@ -122,26 +123,8 @@ async function autocompleteByPattern({ hangul, chosung, alphabet }) {
 
 async function autocompleteByEmbedding(query) {
   try {
-    const similarPlaceIds = await findSimilarPlaces(query);
-
-    const places = await Place.findAll({
-      attributes: ["placeId", "name", "description", "country"],
-      where: {
-        placeId: {
-          [Op.in]: similarPlaceIds,
-        },
-      },
-    });
-
-    const placeMap = new Map();
-    places.forEach((place) => {
-      placeMap.set(place.placeId, place);
-    });
-
-    const sortedPlaces = similarPlaceIds.map((placeId) =>
-      placeMap.get(placeId)
-    );
-    return sortedPlaces;
+    const suggestions = await findSimilarPlaces(query);
+    return suggestions;
   } catch (error) {
     console.error("embedding autocomplete error:", error);
     return [];

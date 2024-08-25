@@ -1,14 +1,38 @@
-const pg = require("pg");
 const pgvector = require("pgvector/pg");
 const axios = require("axios");
-const pgClient = require("../config/postgresql.js");
+const sequelize = require("../config/database");
 require("dotenv").config();
 
+const { QueryTypes } = require("sequelize");
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_EMBEDDING_API_URL = "https://api.openai.com/v1/embeddings";
+const EMBEDDING_MODEL = "text-embedding-3-large";
+
+async function fetchEmbedding(text) {
+  try {
+    const response = await axios.post(
+      OPENAI_EMBEDDING_API_URL,
+      {
+        input: text,
+        model: EMBEDDING_MODEL,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    return response.data.data[0].embedding;
+  } catch (error) {
+    console.error("Error fetching embedding from OpenAI:", error);
+    throw new Error("Failed to fetch embedding");
+  }
+}
 
 async function calculateAndSaveEmbedding(place, categories) {
-  const client = await pgClient.connect();
-
   try {
     const categoryNames = (categories || [])
       .map((category) => category.name)
@@ -20,33 +44,15 @@ async function calculateAndSaveEmbedding(place, categories) {
     }
     text = text.replace(/[\r\n]+/g, " ").trim();
 
-    console.log("    embedding text", text);
+    const embedding = await fetchEmbedding(text);
 
-    const res = await axios.post(
-      "https://api.openai.com/v1/embeddings",
-      {
-        input: text,
-        model: "text-embedding-3-small",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_API_KEY,
-        },
-      }
-    );
-
-    const embedding = res.data.data[0].embedding;
-
-    const queryText =
-      "INSERT INTO placeembedd (placeId, embedding) VALUES($1, $2)";
-    const values = [place.placeId, pgvector.toSql(embedding)];
-
-    await client.query(queryText, values);
+    const queryText = "UPDATE places SET embedding = $2 WHERE place_id = $1;";
+    await sequelize.query(queryText, {
+      type: QueryTypes.UPDATE,
+      bind: [place.placeId, pgvector.toSql(embedding)],
+    });
   } catch (error) {
     console.error("Error calculating or saving embedding:", error);
-  } finally {
-    client.release();
   }
 }
 
@@ -56,42 +62,32 @@ function calculateSimilarityThreshold(query) {
 }
 
 async function findSimilarPlaces(query) {
-  const client = await pgClient.connect();
-
   try {
-    const res = await axios.post(
-      "https://api.openai.com/v1/embeddings",
-      {
-        input: query,
-        model: "text-embedding-3-small",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + OPENAI_API_KEY,
-        },
-      }
-    );
-
-    const embedding = res.data.data[0].embedding;
+    const embedding = await fetchEmbedding(query);
     const similarityThreshold = calculateSimilarityThreshold(query);
 
     const queryText = `
-    SELECT placeid, 1 - (embedding <=> $1) as similarity 
-    FROM placeembedd 
-    WHERE 1 - (embedding <=> $1) > $2
-    ORDER BY similarity DESC 
-    LIMIT 5
-  `;
+      SELECT place_id, name, description, country, 1 - (embedding <=> $1) as similarity 
+      FROM places 
+      WHERE 1 - (embedding <=> $1) > $2
+      ORDER BY similarity DESC 
+      LIMIT 5;
+    `;
 
-    const values = [pgvector.toSql(embedding), similarityThreshold];
-    const result = await client.query(queryText, values);
+    const result = await sequelize.query(queryText, {
+      type: QueryTypes.SELECT,
+      bind: [pgvector.toSql(embedding), similarityThreshold],
+    });
 
-    return result.rows.map((row) => row.placeid);
+    const formattedResult = result.map((row) => ({
+      placeId: row.place_id,
+      ...row,
+    }));
+
+    return formattedResult;
   } catch (error) {
-    console.error("Error calculating or saving embedding:", error);
-  } finally {
-    client.release();
+    console.error("Error finding similar places:", error);
+    throw new Error("Failed to find similar places");
   }
 }
 
